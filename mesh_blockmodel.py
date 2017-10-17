@@ -10,7 +10,7 @@ from math import pi, floor
 
 
 # SET STUFF HERE.
-blockdir = './../MODEL_7_subJapan/'
+blockdir = '/Users/lermert/Desktop/Dropbox/Japan/Model/MODEL_7_subJapan/'
 DOMINANT_PERIOD = 16.0
 ELEMENTS_PER_WAVELENGTH = 2.0
 MIN_RADIUS =  4000./6371. # continue downward about 30 % #5771.0000 / 6371.000
@@ -18,7 +18,7 @@ REFERENCE_RADIUS = 6371.000
 BLOCK_X = blockdir+"block_x"
 BLOCK_Y = blockdir+"block_y"
 BLOCK_Z = blockdir+"block_z"
-output_model_name = 'Simute_2016_Japan.e'
+output_model_name = '/Users/lermert/Desktop/Dropbox/Japan/Model/Simute_2016_Japan_16sec.e'
 disc_style = 'keep_1D' #keep_1D, smooth
 apply_gauss_smooth = True#False
 gauss_stds = [2,2,4]
@@ -394,20 +394,19 @@ nx = len(theta)
 ny = len(phi)
 nz = len(r)
 
-print '='*60
-print "Block grid extent:"
-print np.max(theta), np.max(phi), np.max(r)
-print np.min(theta), np.min(phi), np.min(r)
-
-print "Salvus grid extent:"
-print np.max(theta_mesh), np.max(phi_mesh), np.max(r_mesh)
-print np.min(theta_mesh), np.min(phi_mesh), np.min(r_mesh)
-print '='*60
+print('='*60)
+print("Block grid extent:")
+print(np.max(theta), np.max(phi), np.max(r))
+print(np.min(theta), np.min(phi), np.min(r))
+print("Salvus grid extent:")
+print(np.max(theta_mesh), np.max(phi_mesh), np.max(r_mesh))
+print(np.min(theta_mesh), np.min(phi_mesh), np.min(r_mesh))
+print('='*60)
 
 
 
 (var, filename)= VARIABLES[rank]
-print var
+print(var)
 dat = np.loadtxt(filename, skiprows=2,dtype=np.float64)
 
 #==============================================
@@ -417,13 +416,13 @@ if apply_gauss_smooth:
 
     dat = smooth_ses3_blocks(dat,len(theta),len(phi),len(r),
         gauss_stds[0],gauss_stds[1],gauss_stds[2])
-    print "Applied Gaussian smoothing to " + var
+    print("Applied Gaussian smoothing to " + var)
 
 # walk through the mesh grid points
 newvar = np.zeros(npoints)
 for i in np.arange(npoints):
     if i%1e6 == 0:
-        print "Finished %g points of %g." %(i,npoints)
+        print("Finished %g points of %g." %(i,npoints))
 # find cube and values from spherical regular grid
     point = [theta_mesh[i],phi_mesh[i],r_mesh[i]]
     inds = get_cube(point,theta,phi,r)
