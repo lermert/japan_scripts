@@ -276,7 +276,7 @@ else:
 _AB = np.sin(np.deg2rad(theta.min()))
 # We'll build a spherical chunk at the equator and later rotate it.
 sk = Skeleton.create_spherical_mesh(
-    discontinuities, hmax / 3.0, ndim=3,
+    discontinuities, hmax, ndim=3,
     hmax_refinement=1.5,
     max_colat=[_AB * phi.ptp() * 0.6, theta.ptp() * 0.5],
     min_colat=[-_AB * phi.ptp() * 0.6, -theta.ptp() * 0.5],
