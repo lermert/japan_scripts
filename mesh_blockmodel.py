@@ -470,5 +470,6 @@ for i in range(1,size):
         m.attach_field(varname,newvar)
  
     
-if rank == 0:    
+if rank == 0:
+    m.attach_field('fluid', np.zeros(m.nelem))   
     m.write_exodus(output_model_name)
