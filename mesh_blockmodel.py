@@ -13,8 +13,10 @@ from math import pi, floor
 blockdir = '/Users/lermert/Desktop/Dropbox/Japan/Model/MODEL_7_subJapan/'
 DOMINANT_PERIOD = 16.0
 ELEMENTS_PER_WAVELENGTH = 2.0
-MIN_RADIUS =  4000./6371. # continue downward about 30 % #5771.0000 / 6371.000
-REFERENCE_RADIUS = 6371.000
+MIN_RADIUS =  5800000. # continue downward about 30 % #5771.0000 / 6371.000
+#REFERENCE_RADIUS = 6371.000
+
+scale = 6371000.
 BLOCK_X = blockdir+"block_x"
 BLOCK_Y = blockdir+"block_y"
 BLOCK_Z = blockdir+"block_z"
@@ -190,7 +192,8 @@ nblocks = theta[0]
 if phi[0] != nblocks or r[0] != nblocks:
     msg = 'Block files have different nr. of discontinuities.'
     raise ValueError(msg)
-
+# ses3D has radius in km
+r *= 1000.
 
 if nblocks == 1:
     theta = theta[2:]
@@ -205,7 +208,7 @@ else:
 # r += (6371 - r.max())
 
 # Normalize radius
-r /= REFERENCE_RADIUS
+# r /= REFERENCE_RADIUS
 
 
 # initialize model object
@@ -217,12 +220,15 @@ print("Set up model object with 1-D background.")
 hmax = mod.get_edgelengths(
     dominant_period=DOMINANT_PERIOD,
     elements_per_wavelength=ELEMENTS_PER_WAVELENGTH)
-discontinuities = mod.discontinuities
+print(hmax)
+hmax *= scale
+discontinuities = mod.discontinuities*scale
 
 # Only a chunk
 full_sphere = False
 
 # adapt discontinuities and hmax for min_radius
+
 
 # The 1-D model may have discontinuities in the selected depth range
 if disc_style == 'keep_1D':
@@ -285,7 +291,7 @@ sk = Skeleton.create_spherical_mesh(
     refinement_style=refinement,
     refinement_top_down=True)
 
-m = sk.get_unstructured_mesh()
+m = sk.get_unstructured_mesh(scale=scale)
 
 print('Created sperical mesh.')
 
@@ -409,6 +415,7 @@ print('='*60)
 print(var)
 dat = np.loadtxt(filename, skiprows=2,dtype=np.float64)
 
+
 #==============================================
 # Smoothing 
 #==============================================
@@ -467,6 +474,8 @@ for i in range(1,size):
         print('Received data from rank %g' %i)
 
         varname = VARIABLES[i][0]
+
+        
         m.attach_field(varname,newvar)
  
     
