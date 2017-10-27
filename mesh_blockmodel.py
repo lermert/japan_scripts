@@ -220,28 +220,32 @@ hmax = mod.get_edgelengths(
     elements_per_wavelength=ELEMENTS_PER_WAVELENGTH)
 
 hmax *= scale
-print(hmax)
 discontinuities = mod.discontinuities*scale
+
 
 # Only a chunk
 full_sphere = False
 
 # adapt discontinuities and hmax for min_radius
+idx = discontinuities > MIN_RADIUS
+ndisc = idx.sum() + 2
 
+discontinuities_new = np.zeros(ndisc)
+discontinuities_new[1] = MIN_RADIUS
+discontinuities_new[-ndisc+2:] = discontinuities[idx]
+#discontinuities = discontinuities_new[1:]
+
+hmax_new = np.ones(ndisc-1)
+hmax_new[-ndisc+2:] = hmax[-ndisc+2:]
+#hmax = hmax_new[1:]
+
+full_sphere = False
+
+discontinuities = discontinuities_new[:]
+hmax = hmax_new[:]
 
 # The 1-D model may have discontinuities in the selected depth range
 
-idx = discontinuities > MIN_RADIUS
-ndisc = idx.sum() + 1
-print(ndisc)
-discontinuities_new = np.zeros(ndisc)
-discontinuities_new[0] = MIN_RADIUS
-discontinuities_new[-ndisc+1:] = discontinuities[idx]
-discontinuities = discontinuities_new[:]
-
-hmax_new = np.ones(ndisc-1)
-hmax_new[-ndisc+1:] = hmax[-ndisc+1:]
-hmax = hmax_new[:] 
 
 #==============================================
 # Not sure I understand why we need this:
@@ -289,7 +293,7 @@ sk = Skeleton.create_spherical_mesh(
     refinement_style=refinement,
     refinement_top_down=True)
 
-m = sk.get_unstructured_mesh(scale=scale)
+m = sk.get_unstructured_mesh()
 
 print('Created sperical mesh.')
 
@@ -416,6 +420,9 @@ print('='*60)
 (var, filename)= VARIABLES[rank]
 print(var)
 dat = np.loadtxt(filename, skiprows=2,dtype=np.float64)
+if var in ['VP','VS','VSV','VSH']:
+    print('Converting ses3d model (km/s) to (m/s)')
+    dat *= 1000.
 
 
 #==============================================
