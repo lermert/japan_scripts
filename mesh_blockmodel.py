@@ -10,17 +10,16 @@ from math import pi, floor
 
 
 # SET STUFF HERE.
-blockdir = '/Users/lermert/Desktop/Dropbox/Japan/Model/MODEL_7_subJapan/'
-DOMINANT_PERIOD = 16.0
-ELEMENTS_PER_WAVELENGTH = 2.0
-MIN_RADIUS =  5800000. # continue downward about 30 % #5771.0000 / 6371.000
-#REFERENCE_RADIUS = 6371.000
-
 scale = 6371000.
+blockdir = '../MODEL_7_subJapan/'
+DOMINANT_PERIOD = 15.0
+ELEMENTS_PER_WAVELENGTH = 1.5
+MIN_RADIUS =  5800000. # continue downward about 30 % #5771.0000 / 6371.000
+REFERENCE_RADIUS = 6371.000
 BLOCK_X = blockdir+"block_x"
 BLOCK_Y = blockdir+"block_y"
 BLOCK_Z = blockdir+"block_z"
-output_model_name = '/Users/lermert/Desktop/Dropbox/Japan/Model/Simute_2016_Japan_16sec.e'
+output_model_name = '../Simute_2016_Japan_15s_flat_iso.e'
 disc_style = 'keep_1D' #keep_1D, smooth
 apply_gauss_smooth = True#False
 gauss_stds = [2,2,4]
@@ -33,8 +32,7 @@ print('*'*60)
 
 
 # First item is name of variable in exodus file - second the filename
-VARIABLES = [("VSV",  blockdir+"dvsv_ql6_1Hz"),
-             ("VSH",  blockdir+"dvsh_ql6_1Hz"),
+VARIABLES = [("VS",  blockdir+"dvs_ql6_1Hz_voigt_on_ref"),
              ("VP",  blockdir+"dvp_ql6_1Hz"),
              ("RHO", blockdir+"drho_ORIG"),
              ("QMU",blockdir+"ql_6")]
@@ -195,6 +193,7 @@ if phi[0] != nblocks or r[0] != nblocks:
 # ses3D has radius in km
 r *= 1000.
 
+
 if nblocks == 1:
     theta = theta[2:]
     phi = phi[2:]
@@ -209,7 +208,6 @@ else:
 
 # Normalize radius
 # r /= REFERENCE_RADIUS
-
 
 # initialize model object
 mod = model.built_in("prem_ani")
@@ -233,14 +231,14 @@ full_sphere = False
 # The 1-D model may have discontinuities in the selected depth range
 if disc_style == 'keep_1D':
 
+    print(discontinuities)
     idx = discontinuities > MIN_RADIUS
     ndisc = idx.sum() + 2
-
     discontinuities_new = np.zeros(ndisc)
     discontinuities_new[1] = MIN_RADIUS
     discontinuities_new[-ndisc+2:] = discontinuities[idx]
     discontinuities = discontinuities_new[1:]
-    
+    print(discontinuities)    
     hmax_new = np.ones(ndisc-1)
     hmax_new[-ndisc+2:] = hmax[-ndisc+2:]
     hmax = hmax_new[1:] 
@@ -248,8 +246,8 @@ if disc_style == 'keep_1D':
 #==============================================
 # Not sure I understand why we need this:
 #==============================================
-discontinuities = discontinuities_new[:] # i.e. discontinuities[0] = 0
-hmax = hmax_new[:]    # i.e. hmax[0] = 1.0
+#discontinuities = discontinuities_new[:] # i.e. discontinuities[0] = 0
+#hmax = hmax_new[:]    # i.e. hmax[0] = 1.0
     
 # This doesn't work at the moment:
 # elif disc_style == 'smooth': # No discontinuities; For a ses3D model that has 
@@ -306,7 +304,7 @@ m.find_side_sets(side_set_mode)
 
 
 # Rotate to where the mesh should actually be located.
-m.rotate_coordinates((0, theta.mean(), phi.mean()))
+m.rotate_coordinates((0,theta.mean(), phi.mean()))
 print('Rotated coordinates.')
 
 theta = np.deg2rad(theta)
@@ -407,6 +405,10 @@ print(np.min(theta), np.min(phi), np.min(r))
 print("Salvus grid extent:")
 print(np.max(theta_mesh), np.max(phi_mesh), np.max(r_mesh))
 print(np.min(theta_mesh), np.min(phi_mesh), np.min(r_mesh))
+print('='*60)
+print("Salvus grid extent Cartesian:")
+print(np.max(x_m), np.max(y_m), np.max(z_m))
+print(np.min(x_m), np.min(y_m), np.min(z_m))
 print('='*60)
 
 
