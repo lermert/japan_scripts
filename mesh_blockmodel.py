@@ -14,8 +14,6 @@ blockdir = '/Users/lermert/Desktop/Dropbox/Japan/Model/MODEL_7_subJapan/'
 DOMINANT_PERIOD = 16.0
 ELEMENTS_PER_WAVELENGTH = 2.0
 MIN_RADIUS =  5800000. # continue downward about 30 % #5771.0000 / 6371.000
-#REFERENCE_RADIUS = 6371.000
-
 scale = 6371000.
 BLOCK_X = blockdir+"block_x"
 BLOCK_Y = blockdir+"block_y"
@@ -220,8 +218,9 @@ print("Set up model object with 1-D background.")
 hmax = mod.get_edgelengths(
     dominant_period=DOMINANT_PERIOD,
     elements_per_wavelength=ELEMENTS_PER_WAVELENGTH)
-print(hmax)
+
 hmax *= scale
+print(hmax)
 discontinuities = mod.discontinuities*scale
 
 # Only a chunk
@@ -231,25 +230,25 @@ full_sphere = False
 
 
 # The 1-D model may have discontinuities in the selected depth range
-if disc_style == 'keep_1D':
+#if disc_style == 'keep_1D':
+print(discontinuities)
+idx = discontinuities > MIN_RADIUS
+ndisc = idx.sum() + 1
+print(ndisc)
+discontinuities_new = np.zeros(ndisc)
+discontinuities_new[0] = MIN_RADIUS
+discontinuities_new[-ndisc+1:] = discontinuities[idx]
+discontinuities = discontinuities_new[:]
 
-    idx = discontinuities > MIN_RADIUS
-    ndisc = idx.sum() + 2
-
-    discontinuities_new = np.zeros(ndisc)
-    discontinuities_new[1] = MIN_RADIUS
-    discontinuities_new[-ndisc+2:] = discontinuities[idx]
-    discontinuities = discontinuities_new[1:]
-    
-    hmax_new = np.ones(ndisc-1)
-    hmax_new[-ndisc+2:] = hmax[-ndisc+2:]
-    hmax = hmax_new[1:] 
+hmax_new = np.ones(ndisc-1)
+hmax_new[-ndisc+1:] = hmax[-ndisc+1:]
+hmax = hmax_new[:] 
 
 #==============================================
 # Not sure I understand why we need this:
 #==============================================
-discontinuities = discontinuities_new[:] # i.e. discontinuities[0] = 0
-hmax = hmax_new[:]    # i.e. hmax[0] = 1.0
+#discontinuities = discontinuities_new[:] # i.e. discontinuities[0] = 0
+#hmax = hmax_new[:]    # i.e. hmax[0] = 1.0
     
 # This doesn't work at the moment:
 # elif disc_style == 'smooth': # No discontinuities; For a ses3D model that has 
@@ -407,6 +406,10 @@ print(np.min(theta), np.min(phi), np.min(r))
 print("Salvus grid extent:")
 print(np.max(theta_mesh), np.max(phi_mesh), np.max(r_mesh))
 print(np.min(theta_mesh), np.min(phi_mesh), np.min(r_mesh))
+print('='*60)
+print("Salvus grid extent Cartesian:")
+print(np.max(x_m), np.max(y_m), np.max(z_m))
+print(np.min(x_m), np.min(y_m), np.min(z_m))
 print('='*60)
 
 
